@@ -141,10 +141,18 @@ if latest_version is not None:
         logging.info("User version is outdated.")
     else:
         print("You are running the latest version!")
-        print("Running ping optimizations...")
         logging.info("User is running the latest version.")
-        run_ping_optimizations()
 else:
-    print("Failed to fetch the latest version. Running ping optimizations anyway...")
-    logging.warning("Failed to fetch latest version. Running optimizations without version check.")
-    run_ping_optimizations()
+    print("Failed to fetch the latest version.")
+    logging.warning("Failed to fetch the latest version.")
+
+# Await user command to run optimizations
+while True:
+    user_command = input("Type 'run' to optimize or 'exit' to quit: ").strip().lower()
+    if user_command == "run":
+        run_ping_optimizations()
+    elif user_command == "exit":
+        print("Exiting the program. Goodbye!")
+        break
+    else:
+        print("Invalid command. Please type 'run' or 'exit'.")
