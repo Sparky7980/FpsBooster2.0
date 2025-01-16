@@ -97,7 +97,7 @@ def optimize_power_plan():
         else:
             print("Power plan optimization is only supported on Windows.")
         print("Power plan set to high performance.")
-        logging.info("Power plan set to high performance.")
+        logging.info("Power plan set to Ultimate PC.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error setting power plan: {e}")
         print(f"Error setting power plan: {e}")
