@@ -90,13 +90,13 @@ def system_cleanup():
 
 def optimize_power_plan():
     """Switch to high-performance power plan."""
-    print("Optimizing power plan for high performance...")
+    print("Optimizing power plan for ultimate performance...")
     try:
         if os.name == "nt":  # Windows only
             subprocess.run("powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61", check=True, shell=True)
         else:
             print("Power plan optimization is only supported on Windows.")
-        print("Power plan set to high performance.")
+        print("Power plan set to Ultimate PC.")
         logging.info("Power plan set to Ultimate PC.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error setting power plan: {e}")
