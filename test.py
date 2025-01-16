@@ -119,13 +119,18 @@ def apply_ultimate_performance_plan():
     try:
         # Add the Ultimate Performance plan
         subprocess.run("powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61", check=True, shell=True)
-        # Set it as the active power plan
+        # Try to set Ultimate Performance as the active plan
         subprocess.run("powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61", check=True, shell=True)
         print("Ultimate Performance power plan applied.")
         logging.info("Ultimate Performance power plan applied.")
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error applying Ultimate Performance power plan: {e}")
-        print(f"Error applying Ultimate Performance power plan: {e}")
+    except subprocess.CalledProcessError:
+        print("Ultimate Performance plan not available, falling back to High-Performance plan.")
+        logging.warning("Ultimate Performance plan not available, falling back to High-Performance plan.")
+        # Fall back to High-Performance plan (usually GUID: 8c5e7fda-60b1-4c8b-ae4f-485b6e5fdaea)
+        subprocess.run("powercfg -setactive 8c5e7fda-60b1-4c8b-ae4f-485b6e5fdaea", check=True, shell=True)
+        print("High-Performance power plan applied.")
+        logging.info("High-Performance power plan applied.")
+
 
 def run_ping_optimizations():
     """Run all ping optimization steps."""
