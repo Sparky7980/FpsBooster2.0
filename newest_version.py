@@ -12,13 +12,6 @@ login_url = "https://fpsbooster2.vercel.app/api/login_storage.json"  # Remote lo
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
 
-def is_admin():
-    """Check if the script is being run as Administrator."""
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
-        return False
-
 def fetch_latest_version():
     """Fetch the latest version from the API."""
     url = "https://fpsbooster2.vercel.app/api/latest_version"  # Replace with the actual URL
