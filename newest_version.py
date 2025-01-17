@@ -14,7 +14,7 @@ logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
 
 def fetch_latest_version():
     """Fetch the latest version from the API."""
-    url = "https://fpsbooster2.vercel.app/api/latest_version"  # Replace with the actual URL
+    url = "https://https://pingreducer2.vercel.app/api/latest_version"  # Replace with the actual URL
     try:
         response = requests.get(url, timeout=5)
         response.raise_for_status()
