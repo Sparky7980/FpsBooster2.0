@@ -7,7 +7,7 @@ import json
 
 # User's current version
 version = 1
-login_url = "https://fpsbooster2.vercel.app/api/login_storage.json"  # Remote login storage URL
+login_url = "https://https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
