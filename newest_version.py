@@ -7,14 +7,14 @@ import json
 
 # User's current version
 version = 1
-login_url = "https://https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
+login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
 
 def fetch_latest_version():
     """Fetch the latest version from the API."""
-    url = "https://https://pingreducer2.vercel.app/api/latest_version"  # Replace with the actual URL
+    url = "https://pingreducer2.vercel.app/api/latest_version"  # Replace with the actual URL
     try:
         response = requests.get(url, timeout=5)
         response.raise_for_status()
