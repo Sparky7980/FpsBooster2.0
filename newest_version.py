@@ -137,7 +137,7 @@ if latest_version is not None:
     
     if version < latest_version:
         print("Your version is outdated.")
-        print("Please update to the latest version at: https://fpsbooster2.vercel.app")
+        print("Please update to the latest version at: https://pingreducer2.vercel.app/")
         logging.info("User version is outdated.")
     else:
         print("You are running the latest version!")
