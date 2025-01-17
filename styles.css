@@ -1,32 +1,32 @@
 /* General Styles */
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Press Start 2P', monospace;
     margin: 0;
     padding: 0;
-    background: #121212;
-    color: white;
+    background-color: #000000;
+    color: #00FF00; /* Neon green text for hacker feel */
 }
 
 a {
     text-decoration: none;
-    color: #1e90ff;
+    color: #00FF00;
 }
 
 h1, h2, h3 {
     font-weight: 700;
+    text-transform: uppercase;
 }
 
-/* Header */
 header {
     display: flex;
     justify-content: space-between;
     padding: 20px;
-    background-color: #181818;
+    background-color: #111111;
+    border-bottom: 2px solid #00FF00;
 }
 
 header .logo h1 {
     font-size: 2rem;
-    color: #1e90ff;
 }
 
 nav ul {
@@ -36,15 +36,15 @@ nav ul {
 }
 
 nav ul li a {
-    color: white;
-    font-weight: 500;
+    font-size: 1.2rem;
 }
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, rgba(0, 0, 255, 0.6), rgba(0, 128, 128, 0.6)), url('hero-bg.jpg') no-repeat center center/cover;
-    padding: 80px 20px;
+    background: #111111;
+    padding: 100px 20px;
     text-align: center;
+    border-bottom: 2px solid #00FF00;
 }
 
 .hero h2 {
@@ -54,16 +54,17 @@ nav ul li a {
 
 .hero .cta-button {
     padding: 15px 30px;
-    background-color: #1e90ff;
-    color: white;
+    background-color: #00FF00;
+    color: black;
     border-radius: 5px;
     font-size: 1.2rem;
+    text-transform: uppercase;
 }
 
 /* Features Section */
 .features {
     padding: 50px 20px;
-    background-color: #181818;
+    background-color: #111111;
     text-align: center;
 }
 
@@ -79,10 +80,11 @@ nav ul li a {
 }
 
 .feature-card {
-    background-color: #2e2e2e;
+    background-color: #222222;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 5px;
     width: 300px;
+    border: 2px solid #00FF00;
 }
 
 .feature-card h3 {
@@ -96,6 +98,7 @@ nav ul li a {
 /* How It Works Section */
 .how-it-works {
     padding: 50px 20px;
+    background-color: #111111;
 }
 
 .how-it-works .steps {
@@ -105,16 +108,17 @@ nav ul li a {
 }
 
 .step {
-    background-color: #2e2e2e;
+    background-color: #222222;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 5px;
     width: 250px;
+    border: 2px solid #00FF00;
 }
 
 /* Testimonials Section */
 .testimonials {
     padding: 50px 20px;
-    background-color: #181818;
+    background-color: #111111;
     text-align: center;
 }
 
@@ -125,16 +129,17 @@ nav ul li a {
 }
 
 .testimonial {
-    background-color: #2e2e2e;
+    background-color: #222222;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 5px;
     width: 300px;
+    border: 2px solid #00FF00;
 }
 
 /* Contact Section */
 .contact {
     padding: 50px 20px;
-    background-color: #121212;
+    background-color: #111111;
     text-align: center;
 }
 
@@ -150,27 +155,44 @@ nav ul li a {
 .contact form textarea {
     padding: 10px;
     font-size: 1rem;
-    border: none;
+    border: 1px solid #00FF00;
     border-radius: 5px;
+    background-color: #111111;
+    color: #00FF00;
 }
 
 .contact form .cta-button {
-    background-color: #1e90ff;
-    color: white;
+    background-color: #00FF00;
+    color: black;
     padding: 15px;
     border-radius: 5px;
     font-size: 1.2rem;
+    text-transform: uppercase;
 }
 
 /* Footer */
 footer {
-    background-color: #181818;
-    color: white;
+    background-color: #111111;
+    color: #00FF00;
     padding: 20px;
     text-align: center;
 }
 
 footer .social-media a {
     margin: 0 10px;
-    color: #1e90ff;
+    color: #00FF00;
+}
+
+/* Terminal Cursor Effect */
+.hero-text p {
+    font-size: 1.2rem;
+    border-right: 2px solid #00FF00;
+    padding-right: 5px;
+    animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+    50% {
+        border-color: transparent;
+    }
 }
