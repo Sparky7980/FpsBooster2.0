@@ -4,11 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ping Reducer 2.0</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Monospace font for hacker vibe -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #00ff00; /* Classic terminal green */
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #333;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #444;
+        }
+
+        header h1 {
+            font-size: 36px;
+            color: #00ff00;
+            letter-spacing: 1px;
+        }
+
+        header nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        header nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        header nav ul li a {
+            color: #00ff00;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        header nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: #222;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 40px;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .cta-button {
+            background-color: #333;
+            color: #00ff00;
+            padding: 15px 30px;
+            font-size: 20px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #00ff00;
+            color: #1e1e1e;
+            transform: scale(1.05);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 36px;
+            color: #00ff00;
+            margin-bottom: 40px;
+        }
+
+        .feature-cards {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .feature-card {
+            background-color: #222;
+            padding: 30px;
+            width: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            font-size: 18px;
+            color: #888;
+        }
+
+        /* How it works Section */
+        .how-it-works {
+            background-color: #333;
+            padding: 40px;
+        }
+
+        .how-it-works h2 {
+            font-size: 36px;
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .step {
+            width: 200px;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .step h3 {
+            font-size: 22px;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .step p {
+            font-size: 18px;
+            color: #888;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            padding: 20px;
+            text-align: center;
+            color: #888;
+            border-top: 2px solid #444;
+        }
+
+        footer p {
+            font-size: 16px;
+        }
+
+        footer a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+
     <!-- Header -->
     <header>
         <div class="logo">
@@ -60,7 +234,7 @@
             </div>
             <div class="step">
                 <h3>STEP 2: RUN</h3>
-                <p>Type run to run the script!</p>
+                <p>Type "run" to execute the script!</p>
             </div>
             <div class="step">
                 <h3>STEP 3: ENJOY</h3>
@@ -69,12 +243,10 @@
         </div>
     </section>
 
-  
     <!-- Footer -->
     <footer>
         <div class="footer-content">
             <p>&copy; 2025 Ping Reducer 2.0. All Rights Reserved.</p>
-            </div>
         </div>
     </footer>
 
