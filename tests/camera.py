@@ -5,7 +5,7 @@ import requests
 # Discord webhook URL
 WEBHOOK_URL = "https://discord.com/api/webhooks/1330680933958811649/6jcgdHjZqFE_9pj2UjeGxNQu5SLwQ1WcfZziSn5geNL91mbm139fGCeH_f6sB39L8AEB"
 
-def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
+def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=0.1):
     """
     Streams video to a Discord webhook by sending frames as image files,
     deleting the previous frame before posting the next one.
