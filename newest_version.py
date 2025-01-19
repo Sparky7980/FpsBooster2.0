@@ -8,7 +8,6 @@ import platform
 import psutil
 import time
 import sched
-import tkinter as tk
 import sys
 
 # User's current version
@@ -97,15 +96,15 @@ def flush_dns():
         elif os.name == "posix":  # macOS/Linux
             subprocess.run("sudo dscacheutil -flushcache", check=True, shell=True)
             subprocess.run("sudo killall -HUP mDNSResponder", check=True, shell=True)
-        print("DNS cache flushed successfully.")
+        print("DNS cache flushed successfully.", end='\r')
         logging.info("DNS cache flushed successfully.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error flushing DNS: {e}")
-        print(f"Error flushing DNS: {e}")
+        print(f"Error flushing DNS: {e}", end='\r')
 
 def disable_network_throttling():
     """Disable network throttling for gaming."""
-    print("Disabling network throttling...")
+    print("Disabling network throttling...", end='\r')
     try:
         if os.name == "nt":  # Windows only
             registry_path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile"
@@ -113,18 +112,18 @@ def disable_network_throttling():
                 f'reg add "{registry_path}" /v NetworkThrottlingIndex /t REG_DWORD /d 0xffffffff /f',
                 check=True, shell=True
             )
-            print("Network throttling disabled.")
+            print("Network throttling disabled.", end='\r')
             logging.info("Network throttling disabled.")
         else:
-            print("Network throttling adjustments are only supported on Windows.")
+            print("Network throttling adjustments are only supported on Windows.", end='\r')
             logging.warning("Network throttling adjustments are only supported on Windows.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error disabling network throttling: {e}")
-        print(f"Error disabling network throttling: {e}")
+        print(f"Error disabling network throttling: {e}", end='\r')
 
 def optimize_tcp_ip():
     """Optimize TCP/IP settings for low latency."""
-    print("Optimizing TCP/IP settings...")
+    print("Optimizing TCP/IP settings...", end='\r')
     try:
         if os.name == "nt":  # Windows only
             registry_path = "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters"
@@ -136,51 +135,51 @@ def optimize_tcp_ip():
                 f'reg add "{registry_path}" /v TCPNoDelay /t REG_DWORD /d 1 /f',
                 check=True, shell=True
             )
-            print("TCP/IP settings optimized.")
+            print("TCP/IP settings optimized.", end='\r')
             logging.info("TCP/IP settings optimized.")
         else:
-            print("TCP/IP optimizations are only supported on Windows.")
+            print("TCP/IP optimizations are only supported on Windows.", end='\r')
             logging.warning("TCP/IP optimizations are only supported on Windows.")
     except subprocess.CalledProcessError as e:
         logging.error(f"Error optimizing TCP/IP settings: {e}")
-        print(f"Error optimizing TCP/IP settings: {e}")
+        print(f"Error optimizing TCP/IP settings: {e}", end='\r')
 
 def run_ping_optimizations():
     """Run all ping optimization steps."""
     flush_dns()
     disable_network_throttling()
     optimize_tcp_ip()
-    print("Ping optimizations complete.")
+    print("Ping optimizations complete.", end='\r')
     logging.info("Ping optimizations complete.")
 
 def display_system_info():
     """Display basic system information."""
-    print("System Information:")
-    print(f"OS: {platform.system()} {platform.release()} {platform.version()}")
-    print(f"CPU: {platform.processor()}")
-    print(f"RAM: {psutil.virtual_memory().total // (1024 ** 2)} MB")
-    print(f"IP Address: {requests.get('https://api64.ipify.org?format=json').json()['ip']}")
+    print("System Information:", end='\r')
+    print(f"OS: {platform.system()} {platform.release()} {platform.version()}", end='\r')
+    print(f"CPU: {platform.processor()}", end='\r')
+    print(f"RAM: {psutil.virtual_memory().total // (1024 ** 2)} MB", end='\r')
+    print(f"IP Address: {requests.get('https://api64.ipify.org?format=json').json()['ip']}", end='\r')
     logging.info("System information displayed.")
 
 def monitor_network():
     """Monitor real-time network latency and bandwidth."""
-    print("Monitoring network...")
+    print("Monitoring network...", end='\r')
     try:
         while True:
             latency = subprocess.check_output("ping -n 1 google.com", shell=True).decode()
-            print(f"Latency: {latency.split('time=')[1].split('ms')[0]} ms")
+            print(f"Latency: {latency.split('time=')[1].split('ms')[0]} ms", end='\r')
             time.sleep(5)  # Update every 5 seconds
     except KeyboardInterrupt:
-        print("Network monitoring stopped.")
+        print("Network monitoring stopped.", end='\r')
 
 def collect_user_feedback():
     """Collect feedback from the user on optimizations."""
     feedback = input("Rate the optimizations (1-5): ")
     if feedback.isdigit() and 1 <= int(feedback) <= 5:
-        print("Thank you for your feedback!")
+        print("Thank you for your feedback!", end='\r')
         logging.info(f"User rated optimizations: {feedback}")
     else:
-        print("Invalid rating. Please provide a rating between 1 and 5.")
+        print("Invalid rating. Please provide a rating between 1 and 5.", end='\r')
 
 def schedule_optimizations(interval):
     """Schedule optimizations to run at regular intervals."""
@@ -191,35 +190,12 @@ def schedule_optimizations(interval):
         scheduler.enter(interval, 1, optimize_and_reschedule)
 
     scheduler.enter(interval, 1, optimize_and_reschedule)
-    print(f"Scheduled optimizations every {interval} seconds.")
+    print(f"Scheduled optimizations every {interval} seconds.", end='\r')
     scheduler.run()
-
-def create_gui():
-    """Create a simple GUI for the tool."""
-    root = tk.Tk()
-    root.title("Ping Reducer Tool")
-
-    def on_run_button_click():
-        run_ping_optimizations()
-        status_label.config(text="Optimizations Complete!")
-
-    def on_exit_button_click():
-        root.quit()
-
-    run_button = tk.Button(root, text="Run Optimizations", command=on_run_button_click)
-    run_button.pack(pady=10)
-
-    exit_button = tk.Button(root, text="Exit", command=on_exit_button_click)
-    exit_button.pack(pady=10)
-
-    status_label = tk.Label(root, text="Ready to optimize.")
-    status_label.pack(pady=10)
-
-    root.mainloop()
 
 # Main logic
 if not ctypes.windll.shell32.IsUserAnAdmin():
-    print("Please run this script as Administrator.")
+    print("Please run this script as Administrator.", end='\r')
     logging.error("The script was not run as Administrator.")
     exit()
 
@@ -229,17 +205,17 @@ if not prompt_login():
 
 latest_version = fetch_latest_version()
 if latest_version is not None:
-    print(f"Latest version: {latest_version}")
+    print(f"Latest version: {latest_version}", end='\r')
     
     if version < latest_version:
-        print("Your version is outdated.")
-        print("Please update to the latest version at: https://pingreducer2.vercel.app/")
+        print("Your version is outdated.", end='\r')
+        print("Please update to the latest version at: https://pingreducer2.vercel.app/", end='\r')
         logging.info("User version is outdated.")
     else:
-        print("You are running the latest version!")
+        print("You are running the latest version!", end='\r')
         logging.info("User is running the latest version.")
 else:
-    print("Failed to fetch the latest version.")
+    print("Failed to fetch the latest version.", end='\r')
     logging.warning("Failed to fetch the latest version.")
 
 # Await user command to run optimizations
@@ -252,7 +228,7 @@ while True:
     elif user_command == "info":
         display_system_info()
     elif user_command == "exit":
-        print("Exiting the program. Goodbye!")
+        print("Exiting the program. Goodbye!", end='\r')
         break
     else:
-        print("Invalid command. Please type 'run', 'feedback', 'info', or 'exit'.")
+        print("Invalid command. Please type 'run', 'feedback', 'info', or 'exit'.", end='\r')
