@@ -9,10 +9,23 @@ import psutil
 import time
 import sched
 import tkinter as tk
+import sys
 
 # User's current version
 version = 1
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except:
+        return False
+
+# If not running as administrator, request elevation
+if not is_admin():
+    print("This script requires administrator privileges. Restarting with elevated rights...")
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
+    sys.exit()
 
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
