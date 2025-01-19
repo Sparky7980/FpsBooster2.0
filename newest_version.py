@@ -3,7 +3,6 @@ import subprocess
 import requests
 import ctypes
 import logging
-import json
 import platform
 import psutil
 import time
@@ -27,6 +26,9 @@ if not os.path.exists(program_files_dir):
 
 # Log file path
 log_file = os.path.join(program_files_dir, 'ping_reducer.log')
+
+# Discord Webhook URL
+discord_webhook_reviews_url = "https://discord.com/api/webhooks/1330653431529996348/Kz_umWDfq_KGNSiiNx7WcfuS0TCvlm0SJRbLFe3b0eJQQeTJAYX2xDMKu2j5wjiGfO8o"
 
 def is_admin():
     try:
@@ -89,7 +91,7 @@ def prompt_login():
 
 def flush_dns():
     """Flush the DNS cache."""
-    print("Flushing DNS cache...")
+    print("Flushing DNS cache...", end='\r')
     try:
         if os.name == "nt":  # Windows
             subprocess.run("ipconfig /flushdns", check=True, shell=True)
@@ -152,6 +154,46 @@ def run_ping_optimizations():
     print("Ping optimizations complete.", end='\r')
     logging.info("Ping optimizations complete.")
 
+def send_feedback_to_discord(feedback):
+    """Send the feedback to the Discord webhook."""
+    data = {
+        "embeds": [
+            {
+                "title": "Ping Reducer Feedback",
+                "color": 16711680,  # Red color (use any color you like)
+                "fields": [
+                    {
+                        "name": "User Feedback",
+                        "value": f"Rating: ⭐{feedback} stars",
+                        "inline": False
+                    }
+                ],
+                "footer": {
+                    "text": "Feedback received from Ping Reducer Tool"
+                }
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(discord_webhook_reviews_url, json=data)
+        if response.status_code == 204:
+            print("Feedback sent to Discord successfully.", end='\r')
+        else:
+            print(f"Failed to send feedback to Discord: {response.status_code}", end='\r')
+    except Exception as e:
+        print(f"Error sending feedback to Discord: {e}", end='\r')
+
+def collect_user_feedback():
+    """Collect feedback from the user on optimizations."""
+    feedback = input("Rate the optimizations (1-5 stars): ")
+    if feedback.isdigit() and 1 <= int(feedback) <= 5:
+        print("Thank you for your feedback!", end='\r')
+        logging.info(f"User rated optimizations: {feedback}")
+        send_feedback_to_discord(feedback)  # Send to Discord
+    else:
+        print("Invalid rating. Please provide a rating between 1 and 5.", end='\r')
+
 def display_system_info():
     """Display basic system information."""
     print("System Information:", end='\r')
@@ -160,38 +202,6 @@ def display_system_info():
     print(f"RAM: {psutil.virtual_memory().total // (1024 ** 2)} MB", end='\r')
     print(f"IP Address: {requests.get('https://api64.ipify.org?format=json').json()['ip']}", end='\r')
     logging.info("System information displayed.")
-
-def monitor_network():
-    """Monitor real-time network latency and bandwidth."""
-    print("Monitoring network...", end='\r')
-    try:
-        while True:
-            latency = subprocess.check_output("ping -n 1 google.com", shell=True).decode()
-            print(f"Latency: {latency.split('time=')[1].split('ms')[0]} ms", end='\r')
-            time.sleep(5)  # Update every 5 seconds
-    except KeyboardInterrupt:
-        print("Network monitoring stopped.", end='\r')
-
-def collect_user_feedback():
-    """Collect feedback from the user on optimizations."""
-    feedback = input("Rate the optimizations (1-5): ")
-    if feedback.isdigit() and 1 <= int(feedback) <= 5:
-        print("Thank you for your feedback!", end='\r')
-        logging.info(f"User rated optimizations: {feedback}")
-    else:
-        print("Invalid rating. Please provide a rating between 1 and 5.", end='\r')
-
-def schedule_optimizations(interval):
-    """Schedule optimizations to run at regular intervals."""
-    scheduler = sched.scheduler(time.time, time.sleep)
-    
-    def optimize_and_reschedule():
-        run_ping_optimizations()
-        scheduler.enter(interval, 1, optimize_and_reschedule)
-
-    scheduler.enter(interval, 1, optimize_and_reschedule)
-    print(f"Scheduled optimizations every {interval} seconds.", end='\r')
-    scheduler.run()
 
 # Main logic
 if not ctypes.windll.shell32.IsUserAnAdmin():
