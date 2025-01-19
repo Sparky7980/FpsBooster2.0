@@ -4,10 +4,28 @@ import requests
 import ctypes
 import logging
 import json
+import platform
+import psutil
+import time
+import sched
+import tkinter as tk
+import sys
 
 # User's current version
 version = 1
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except:
+        return False
+
+# If not running as administrator, request elevation
+if not is_admin():
+    print("This script requires administrator privileges. Restarting with elevated rights...")
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
+    sys.exit()
 
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
@@ -121,8 +139,96 @@ def run_ping_optimizations():
     print("Ping optimizations complete.")
     logging.info("Ping optimizations complete.")
 
+def display_system_info():
+    """Display basic system information."""
+    print("System Information:")
+    print(f"OS: {platform.system()} {platform.release()} {platform.version()}")
+    print(f"CPU: {platform.processor()}")
+    print(f"RAM: {psutil.virtual_memory().total // (1024 ** 2)} MB")
+    print(f"IP Address: {requests.get('https://api64.ipify.org?format=json').json()['ip']}")
+    logging.info("System information displayed.")
+
+def monitor_network():
+    """Monitor real-time network latency and bandwidth."""
+    print("Monitoring network...")
+    try:
+        while True:
+            latency = subprocess.check_output("ping -n 1 google.com", shell=True).decode()
+            print(f"Latency: {latency.split('time=')[1].split('ms')[0]} ms")
+            time.sleep(5)  # Update every 5 seconds
+    except KeyboardInterrupt:
+        print("Network monitoring stopped.")
+
+def backup_config():
+    """Backup current configuration settings."""
+    config = {
+        "network_throttling": check_network_throttling(),
+        "tcp_ip_settings": check_tcp_ip_settings(),
+    }
+    with open('config_backup.json', 'w') as f:
+        json.dump(config, f)
+    print("Configuration settings backed up successfully.")
+    logging.info("Configuration settings backed up.")
+
+def restore_config():
+    """Restore configuration settings from backup."""
+    if os.path.exists('config_backup.json'):
+        with open('config_backup.json', 'r') as f:
+            config = json.load(f)
+        # Apply the settings
+        apply_network_throttling(config['network_throttling'])
+        apply_tcp_ip_settings(config['tcp_ip_settings'])
+        print("Configuration settings restored successfully.")
+        logging.info("Configuration settings restored.")
+    else:
+        print("No backup found.")
+
+def collect_user_feedback():
+    """Collect feedback from the user on optimizations."""
+    feedback = input("Rate the optimizations (1-5): ")
+    if feedback.isdigit() and 1 <= int(feedback) <= 5:
+        print("Thank you for your feedback!")
+        logging.info(f"User rated optimizations: {feedback}")
+    else:
+        print("Invalid rating. Please provide a rating between 1 and 5.")
+
+def schedule_optimizations(interval):
+    """Schedule optimizations to run at regular intervals."""
+    scheduler = sched.scheduler(time.time, time.sleep)
+    
+    def optimize_and_reschedule():
+        run_ping_optimizations()
+        scheduler.enter(interval, 1, optimize_and_reschedule)
+
+    scheduler.enter(interval, 1, optimize_and_reschedule)
+    print(f"Scheduled optimizations every {interval} seconds.")
+    scheduler.run()
+
+def create_gui():
+    """Create a simple GUI for the tool."""
+    root = tk.Tk()
+    root.title("Ping Reducer Tool")
+
+    def on_run_button_click():
+        run_ping_optimizations()
+        status_label.config(text="Optimizations Complete!")
+
+    def on_exit_button_click():
+        root.quit()
+
+    run_button = tk.Button(root, text="Run Optimizations", command=on_run_button_click)
+    run_button.pack(pady=10)
+
+    exit_button = tk.Button(root, text="Exit", command=on_exit_button_click)
+    exit_button.pack(pady=10)
+
+    status_label = tk.Label(root, text="Ready to optimize.")
+    status_label.pack(pady=10)
+
+    root.mainloop()
+
 # Main logic
-if not is_admin():
+if not ctypes.windll.shell32.IsUserAnAdmin():
     print("Please run this script as Administrator.")
     logging.error("The script was not run as Administrator.")
     exit()
@@ -148,11 +254,15 @@ else:
 
 # Await user command to run optimizations
 while True:
-    user_command = input("Type 'run' to optimize or 'exit' to quit: ").strip().lower()
+    user_command = input("Type 'run' to optimize, 'feedback' for feedback, 'info' for system info, 'exit' to quit: ").strip().lower()
     if user_command == "run":
         run_ping_optimizations()
+    elif user_command == "feedback":
+        collect_user_feedback()
+    elif user_command == "info":
+        display_system_info()
     elif user_command == "exit":
         print("Exiting the program. Goodbye!")
         break
     else:
-        print("Invalid command. Please type 'run' or 'exit'.")
+        print("Invalid command. Please type 'run', 'feedback', 'info', or 'exit'.")
