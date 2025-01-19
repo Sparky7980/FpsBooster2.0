@@ -3,11 +3,12 @@ import time
 import requests
 
 # Discord webhook URL
-WEBHOOK_URL = "https://discord.com/api/webhooks/1330674445865586728/W2BI-bA25yoVHs0XTclaneW7mXtp-Dhhw_eB8sHQDtw8fCzvVm88riYSkJ14etboAaBE"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1330680933958811649/6jcgdHjZqFE_9pj2UjeGxNQu5SLwQ1WcfZziSn5geNL91mbm139fGCeH_f6sB39L8AEB"
 
 def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
     """
-    Streams video to a Discord webhook by sending frames as image files.
+    Streams video to a Discord webhook by sending frames as image files,
+    deleting the previous frame before posting the next one.
 
     :param webhook_url: The Discord webhook URL
     :param video_source: Video source for OpenCV (default is 0 for webcam)
@@ -18,6 +19,11 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
     if not cap.isOpened():
         print("Error: Unable to access the video source.")
         return
+
+    previous_message_id = None  # To store the ID of the previous message
+    headers = {
+        "Content-Type": "application/json"
+    }
 
     try:
         print("Streaming video. Press Ctrl+C to stop.")
@@ -36,12 +42,23 @@ def stream_video_to_webhook(webhook_url, video_source=0, frame_interval=1):
                 "file": ("frame.jpg", buffer.tobytes(), "image/jpeg")
             }
 
+            # If there's a previous message, delete it
+            if previous_message_id:
+                delete_url = f"{webhook_url}/messages/{previous_message_id}"
+                delete_response = requests.delete(delete_url)
+                if delete_response.status_code != 204:
+                    print(f"Warning: Failed to delete previous frame. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+
             # Send the frame to the webhook
             response = requests.post(webhook_url, files=files)
-            if response.status_code != 204:
+            if response.status_code == 200:
+                # Extract the new message ID for future deletion
+                response_data = response.json()
+                previous_message_id = response_data["id"]
+            else:
                 print(f"Error: Failed to send frame. Status code: {response.status_code}, Response: {response.text}")
-            
-            # Wait before sending the next frame to simulate a stream
+
+            # Wait before sending the next frame
             time.sleep(frame_interval)
     except KeyboardInterrupt:
         print("\nStreaming stopped.")
