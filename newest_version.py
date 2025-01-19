@@ -15,6 +15,20 @@ import sys
 version = 1
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
+# Directory for logs
+program_files_dir = os.path.join(os.environ.get('ProgramFiles', ''), 'PingReducer2')
+
+# Ensure the folder exists
+if not os.path.exists(program_files_dir):
+    try:
+        os.makedirs(program_files_dir)
+    except PermissionError:
+        print(f"Error creating directory {program_files_dir}. Please run as Administrator.")
+        sys.exit(1)
+
+# Log file path
+log_file = os.path.join(program_files_dir, 'ping_reducer.log')
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
@@ -27,8 +41,8 @@ if not is_admin():
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
     sys.exit()
 
-# Set up logging to capture errors and debug information
-logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
+# Set up logging to capture errors and debug information in the Program Files folder
+logging.basicConfig(filename=log_file, level=logging.DEBUG)
 
 def fetch_latest_version():
     """Fetch the latest version from the API."""
@@ -158,30 +172,6 @@ def monitor_network():
             time.sleep(5)  # Update every 5 seconds
     except KeyboardInterrupt:
         print("Network monitoring stopped.")
-
-def backup_config():
-    """Backup current configuration settings."""
-    config = {
-        "network_throttling": check_network_throttling(),
-        "tcp_ip_settings": check_tcp_ip_settings(),
-    }
-    with open('config_backup.json', 'w') as f:
-        json.dump(config, f)
-    print("Configuration settings backed up successfully.")
-    logging.info("Configuration settings backed up.")
-
-def restore_config():
-    """Restore configuration settings from backup."""
-    if os.path.exists('config_backup.json'):
-        with open('config_backup.json', 'r') as f:
-            config = json.load(f)
-        # Apply the settings
-        apply_network_throttling(config['network_throttling'])
-        apply_tcp_ip_settings(config['tcp_ip_settings'])
-        print("Configuration settings restored successfully.")
-        logging.info("Configuration settings restored.")
-    else:
-        print("No backup found.")
 
 def collect_user_feedback():
     """Collect feedback from the user on optimizations."""
