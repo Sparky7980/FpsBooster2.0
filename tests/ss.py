@@ -63,7 +63,7 @@ def main():
         
         # Wait before capturing the next screenshot
         print("Waiting for 60 seconds before taking the next screenshot...")
-        time.sleep(60)
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
