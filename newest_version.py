@@ -10,7 +10,7 @@ import sched
 import sys
 
 # User's current version
-version = 1
+version = 2
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
 # Directory for logs
