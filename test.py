@@ -12,7 +12,7 @@ import tkinter as tk
 import sys
 
 # User's current version
-version = 2
+version = 1
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
 def is_admin():
