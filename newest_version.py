@@ -79,7 +79,7 @@ def prompt_login():
         return False
     
     # Prompt the user for login
-    user_login = input("Enter login (numeric): ")
+    user_login = input("Author: Aydin E - Enter login (numeric): ")
     
     if user_login in logins:
         print("Login successful.")
