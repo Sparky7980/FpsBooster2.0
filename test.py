@@ -10,29 +10,37 @@ import time
 import sched
 import tkinter as tk
 import sys
+import threading
+import winreg  # Windows registry module
 
 # User's current version
 version = 2
 login_url = "https://pingreducer2.vercel.app/api/login_storage.json"  # Remote login storage URL
 
-def is_admin():
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin() != 0
-    except:
-        return False
-
-# If not running as administrator, request elevation
-if not is_admin():
-    print("This script requires administrator privileges. Restarting with elevated rights...")
-    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
-    sys.exit()
-
 # Set up logging to capture errors and debug information
 logging.basicConfig(filename='fps_booster.log', level=logging.DEBUG)
 
+def is_admin():
+    """Check if the script is running with administrator privileges."""
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception as e:
+        logging.error(f"Error checking admin privileges: {e}")
+        return False
+
+def request_elevation():
+    """Request elevation (administrator privileges) if not already running as admin."""
+    logging.info("This script requires administrator privileges. Restarting with elevated rights...")
+    try:
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
+        sys.exit()
+    except Exception as e:
+        logging.error(f"Error during elevation attempt: {e}")
+        sys.exit()
+
 def fetch_latest_version():
     """Fetch the latest version from the API."""
-    url = "https://pingreducer2.vercel.app/api/latest_version"  # Replace with the actual URL
+    url = "https://pingreducer2.vercel.app/api/latest_version"
     try:
         response = requests.get(url, timeout=5)
         response.raise_for_status()
@@ -57,7 +65,6 @@ def fetch_logins():
 def prompt_login():
     """Prompt the user for login and validate against remote data."""
     logins = fetch_logins()
-    
     if logins is None:
         print("Failed to fetch login data. Please try again later.")
         logging.error("Failed to fetch login data.")
@@ -94,7 +101,7 @@ def disable_network_throttling():
     print("Disabling network throttling...")
     try:
         if os.name == "nt":  # Windows only
-            registry_path = "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile"
+            registry_path = r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
             subprocess.run(
                 f'reg add "{registry_path}" /v NetworkThrottlingIndex /t REG_DWORD /d 0xffffffff /f',
                 check=True, shell=True
@@ -113,7 +120,7 @@ def optimize_tcp_ip():
     print("Optimizing TCP/IP settings...")
     try:
         if os.name == "nt":  # Windows only
-            registry_path = "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters"
+            registry_path = r"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
             subprocess.run(
                 f'reg add "{registry_path}" /v TcpAckFrequency /t REG_DWORD /d 1 /f',
                 check=True, shell=True
@@ -145,7 +152,12 @@ def display_system_info():
     print(f"OS: {platform.system()} {platform.release()} {platform.version()}")
     print(f"CPU: {platform.processor()}")
     print(f"RAM: {psutil.virtual_memory().total // (1024 ** 2)} MB")
-    print(f"IP Address: {requests.get('https://api64.ipify.org?format=json').json()['ip']}")
+    try:
+        ip = requests.get('https://api64.ipify.org?format=json').json()['ip']
+        print(f"IP Address: {ip}")
+    except Exception as e:
+        print("Error fetching IP address.")
+        logging.error(f"Error fetching IP address: {e}")
     logging.info("System information displayed.")
 
 def monitor_network():
@@ -154,10 +166,83 @@ def monitor_network():
     try:
         while True:
             latency = subprocess.check_output("ping -n 1 google.com", shell=True).decode()
-            print(f"Latency: {latency.split('time=')[1].split('ms')[0]} ms")
+            # Extract latency value if possible
+            try:
+                latency_ms = latency.split('time=')[1].split('ms')[0].strip()
+                print(f"Latency: {latency_ms} ms")
+            except IndexError:
+                print("Could not parse latency output.")
             time.sleep(5)  # Update every 5 seconds
     except KeyboardInterrupt:
         print("Network monitoring stopped.")
+
+# --- New functions to backup and restore settings ---
+
+def check_network_throttling():
+    """Check the current network throttling setting from the registry."""
+    try:
+        reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                 r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile")
+        value, _ = winreg.QueryValueEx(reg_key, "NetworkThrottlingIndex")
+        winreg.CloseKey(reg_key)
+        logging.info(f"Current NetworkThrottlingIndex: {value}")
+        return value
+    except Exception as e:
+        logging.error(f"Error checking network throttling: {e}")
+        return None
+
+def check_tcp_ip_settings():
+    """Check current TCP/IP settings from the registry and return as a dictionary."""
+    settings = {}
+    try:
+        reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                 r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters")
+        try:
+            value, _ = winreg.QueryValueEx(reg_key, "TcpAckFrequency")
+            settings["TcpAckFrequency"] = value
+        except FileNotFoundError:
+            settings["TcpAckFrequency"] = None
+        try:
+            value, _ = winreg.QueryValueEx(reg_key, "TCPNoDelay")
+            settings["TCPNoDelay"] = value
+        except FileNotFoundError:
+            settings["TCPNoDelay"] = None
+        winreg.CloseKey(reg_key)
+        logging.info(f"Current TCP/IP settings: {settings}")
+        return settings
+    except Exception as e:
+        logging.error(f"Error checking TCP/IP settings: {e}")
+        return None
+
+def apply_network_throttling(value):
+    """Restore network throttling setting in the registry."""
+    try:
+        registry_path = r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
+        subprocess.run(
+            f'reg add "{registry_path}" /v NetworkThrottlingIndex /t REG_DWORD /d {value} /f',
+            check=True, shell=True
+        )
+        logging.info(f"Network throttling restored to {value}.")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error applying network throttling: {e}")
+
+def apply_tcp_ip_settings(settings):
+    """Restore TCP/IP settings in the registry."""
+    try:
+        registry_path = r"HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+        if settings.get("TcpAckFrequency") is not None:
+            subprocess.run(
+                f'reg add "{registry_path}" /v TcpAckFrequency /t REG_DWORD /d {settings["TcpAckFrequency"]} /f',
+                check=True, shell=True
+            )
+        if settings.get("TCPNoDelay") is not None:
+            subprocess.run(
+                f'reg add "{registry_path}" /v TCPNoDelay /t REG_DWORD /d {settings["TCPNoDelay"]} /f',
+                check=True, shell=True
+            )
+        logging.info(f"TCP/IP settings restored: {settings}")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error applying TCP/IP settings: {e}")
 
 def backup_config():
     """Backup current configuration settings."""
@@ -175,9 +260,11 @@ def restore_config():
     if os.path.exists('config_backup.json'):
         with open('config_backup.json', 'r') as f:
             config = json.load(f)
-        # Apply the settings
-        apply_network_throttling(config['network_throttling'])
-        apply_tcp_ip_settings(config['tcp_ip_settings'])
+        # Apply the settings if they were backed up
+        if config.get("network_throttling") is not None:
+            apply_network_throttling(config['network_throttling'])
+        if config.get("tcp_ip_settings") is not None:
+            apply_tcp_ip_settings(config['tcp_ip_settings'])
         print("Configuration settings restored successfully.")
         logging.info("Configuration settings restored.")
     else:
@@ -228,22 +315,18 @@ def create_gui():
     root.mainloop()
 
 # Main logic
-if not ctypes.windll.shell32.IsUserAnAdmin():
-    print("Please run this script as Administrator.")
-    logging.error("The script was not run as Administrator.")
-    exit()
+if not is_admin():
+    request_elevation()
 
 # Login process
 if not prompt_login():
-    exit()  # Exit if login failed
+    sys.exit()  # Exit if login failed
 
 latest_version = fetch_latest_version()
 if latest_version is not None:
     print(f"Latest version: {latest_version}")
-    
     if version < latest_version:
         print("Your version is outdated.")
-        print("Please update to the latest version at: https://pingreducer2.vercel.app/")
         logging.info("User version is outdated.")
     else:
         print("You are running the latest version!")
